@@ -30,3 +30,14 @@
 *.exe
 *.out
 *.app
+
+# Virtualenv
+venv/
+
+# Python files
+*.pyc
+
+# Directories
+.idea/
+install/
+bld/
