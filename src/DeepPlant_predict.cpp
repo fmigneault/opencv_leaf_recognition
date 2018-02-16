@@ -15,14 +15,13 @@ using namespace cv::dnn;
 #include <vector>
 using namespace std;
 
-const size_t inModelW = 256;
-const size_t inModelH = 256;
+const size_t inModelW = 227;
+const size_t inModelH = 227;
 
 const char* params
     = "{ help           | false                 | print usage }"
       "{ proto          | model.prototxt        | model configuration }"
       "{ model          | model.caffemodel      | model weights }"
-      "{ mean           | mean.npy              | model image mean values }"
       "{ labels         | id.txt                | model class labels }"
       "{ image          |                       | image to predict class }"
       "{ min_confidence | 0.2                   | min confidence threshold }"
@@ -32,9 +31,10 @@ const char* params
 int main(int argc, char** argv)
 {
     cv::CommandLineParser parser(argc, argv, params);
-    parser.about("Sample to predict leaves from LeafNet model "
-                 "[https://leafnet.pbarre.de] trained with either "
-                 "of the Flavia, Foliage or LeafSnap datasets.\n");
+    parser.about("Sample to predict leaves from Deep-Plant model "
+                 "[https://github.com/cs-chan/Deep-Plant] trained "
+                 "with the Flavia and MalayaKew datasets, for "
+                 "patches and whole leaves combinations.\n");
 
     if (parser.get<bool>("help") || argc == 1) {
         parser.printMessage();
@@ -43,10 +43,8 @@ int main(int argc, char** argv)
 
     cv::String modelConfiguration = parser.get<String>("proto");
     cv::String modelBinary = parser.get<String>("model");
-    cv::String modelMeanImagePath = parser.get<String>("mean");
     std::vector<std::string> modelLabels = readClassLabels(parser.get<String>("labels"));
-    CV_Assert(!modelConfiguration.empty() && !modelBinary.empty() &&
-              !modelMeanImagePath.empty() && modelBinary.size() > 0);
+    CV_Assert(!modelConfiguration.empty() && !modelBinary.empty() && modelBinary.size() > 0);
 
     //! [Initialize network]
     dnn::Net net = readNetFromCaffe(modelConfiguration, modelBinary);
@@ -60,14 +58,14 @@ int main(int argc, char** argv)
         std::cerr << "prototxt:   " << modelConfiguration << std::endl;
         std::cerr << "caffemodel: " << modelBinary << std::endl;
         std::cerr << "Models can be downloaded here:" << std::endl;
-        std::cerr << "https://leafnet.pbarre.de/LeafNet_beta_0.0.1.zip" << std::endl;
+        std::cerr << "https://github.com/cs-chan/Deep-Plant" << std::endl;
         exit(-1);
     }
 
     float confidenceThreshold = parser.get<float>("min_confidence");
     CV_Assert(confidenceThreshold >= 0 && confidenceThreshold <= 1);
 
-    String display_title = "LeafNet: Prediction";
+    String display_title = "Deep-Plant: Prediction";
     namedWindow(display_title, WINDOW_NORMAL | WINDOW_FREERATIO | CV_GUI_EXPANDED);
     resizeWindow(display_title, inModelW, inModelH);
 
@@ -83,17 +81,8 @@ int main(int argc, char** argv)
     if (img.channels() == 4)
         cv::cvtColor(img, img, COLOR_BGRA2BGR);
     cv::resize(img, img, Size(inModelW, inModelH), 0, 0, cv::INTER_NEAREST);
-
-    cnpy::NpyArray npyArr = cnpy::npy_load(modelMeanImagePath);
-    cv::Mat meanImage(inModelH, inModelW, CV_32FC3, npyArr.data<float>());
-
     std::cout << "image: " << img.size() << " x " << img.channels() << ", "
               << img.depth() << ", " << img.elemSize() << std::endl;
-    std::cout << "mean:  " << meanImage.size() << " x " << meanImage.channels() << ", "
-              << meanImage.depth() << ", " << meanImage.elemSize() << std::endl;
-    cv::imshow("input image", img);
-    cv::imshow("mean image", meanImage);
-    ///cv::subtract(img, meanImage, img, cv::noArray(), CV_32FC3);
 
     //! [Prepare blob]
     cv::Mat inputBlob = blobFromImage(img, 1.0, cv::Size(inModelW, inModelH), Scalar(),

@@ -16,8 +16,8 @@ Clone the repo and use the provided CMake script to compile C++ codes.
 ```
 git clone https://github.com/fmigneault/opencv_leaf_recognition
 cd opencv_leaf_recognition
-mkdir bld
-cd bld
+mkdir build
+cd build
 cmake ..
 make -j4
 make install

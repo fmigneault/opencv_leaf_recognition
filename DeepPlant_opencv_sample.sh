@@ -10,14 +10,14 @@ deep_plant_eval="/home/nvidia/leaf_deep_learning/plant_samples/Acer_palmatum0.jp
 # model options
 # ==========
 # model_leaf: PT (patch) | WL (whole)
-model_leaf=whole
+model_leaf=WL
 # model_type: model | short
 model_type=model
 model_name=FinetuneAlexNet_${model_type}_${model_leaf}
-models_dir=$base_dir/../deep_plant/deep_plant_Testing/Model
+models_dir=$base_dir/../deep-plant/models
 model_proto=$models_dir/$model_name/deploy.prototxt
 model_caffe=$models_dir/$model_name/finetune_flickr_style_iter_100000.caffemodel
-model_labels=base_dir/../leaf_deep_learning/MalayaKew Dataset/MK/name_of_spesies.txt
+model_labels="$base_dir/../leaf_deep_learning/MalayaKew-Dataset/MK/name_of_spesies.txt"
 
 # ==========
 # command
