@@ -4,7 +4,10 @@
 
 cmake_minimum_required(VERSION 2.8)
 
+# =========================
 # project
+# =========================
+
 set(cvLeafRecog_PROJECT "cvLeafRecog")
 project(${cvLeafRecog_PROJECT})
 
@@ -57,11 +60,24 @@ foreach(p LIBRARY BINARY INCLUDE CMAKE)
     endif()
 endforeach()
 
+# =========================
 # find header/source files
-set(cvLeafRecog_SAMPLE_NAME "LeafNet_predict")
+# =========================
+
+# common files
 set(cvLeafRecog_HEADER_FILES ${cvLeafRecog_HEADER_FILES} ${cvLeafRecog_INCLUDE_DIRS}/class_labels.hpp)
 set(cvLeafRecog_SOURCE_FILES ${cvLeafRecog_SOURCE_FILES} ${cvLeafRecog_SOURCES_DIRS}/class_labels.cpp)
-set(cvLeafRecog_SOURCE_FILES ${cvLeafRecog_SOURCE_FILES} ${cvLeafRecog_SOURCES_DIRS}/${cvLeafRecog_SAMPLE_NAME}.cpp)
+
+# LeafNet
+set(cvLeafNet_SAMPLE_NAME "LeafNet_predict")
+set(cvLeafnet_SOURCE_FILES ${cvLeafnet_SOURCE_FILES} ${cvLeafRecog_SOURCES_DIRS}/${cvLeafNet_SAMPLE_NAME}.cpp)
+
+# Deep-Plant
+set(cvDeepPlant_SAMPLE_NAME "DeepPlant_predict")
+set(cvDeepPlant_SOURCE_FILES ${cvDeepPlant_SOURCE_FILES} ${cvLeafRecog_SOURCES_DIRS}/${cvDeepPlant_SAMPLE_NAME}.cpp)
+
+# project samples
+set(cvLeafRecog_SAMPLES ${cvLeafNet_SAMPLE_NAME} ${cvDeepPlant_SAMPLE_NAME})
 
 # cvLeafRecog configs
 set(cvLeafRecog_INCLUDE_DIR       ${cvLeafRecog_INCLUDE_DIRS})
@@ -72,6 +88,10 @@ set(cvLeafRecog_LIBRARY_RELEASE   ${CMAKE_${cvLeafRecog_LIBRARY_TYPE}_LIBRARY_PR
 
 # cvLeafRecog root path (cvLeafRecogOptions)
 add_definitions(-DcvLeafRecog_ROOT_PATH="${cvLeafRecog_ROOT_DIR}")
+
+# =========================
+# dependencies/packages
+# =========================
 
 # find cnpy
 set(cvLeafRecog_INCLUDE_DIRS   ${cvLeafRecog_INCLUDE_DIRS}    cnpy)
@@ -101,15 +121,28 @@ find_package(OpenCV 3 REQUIRED)
 set(cvLeafRecog_INCLUDE_DIRS   ${cvLeafRecog_INCLUDE_DIRS}    ${OpenCV_INCLUDE_DIRS})
 set(cvLeafRecog_LIBRARIES      ${cvLeafRecog_LIBRARIES}       ${OpenCV_LIBRARIES})
 
+# =========================
+# setup links/targets
+# =========================
+
 # include/linking
 add_definitions(${cvLeafRecog_LIBRARY_DEFINITION})
-add_executable(${cvLeafRecog_SAMPLE_NAME} ${cvLeafRecog_LIBRARY_TYPE} ${cvLeafRecog_SOURCE_FILES} ${cvLeafRecog_HEADER_FILES})
-if(MSVC)
-    set_target_properties(${cvLeafRecog_SAMPLE_NAME} PROPERTIES LINKER_LANGUAGE C++)
-endif()
-target_include_directories(${cvLeafRecog_SAMPLE_NAME} PUBLIC ${cvLeafRecog_INCLUDE_DIRS})
-target_link_libraries(${cvLeafRecog_SAMPLE_NAME} ${cvLeafRecog_LIBRARIES})
+add_executable(${cvLeafNet_SAMPLE_NAME}    ${cvLeafRecog_LIBRARY_TYPE} ${cvLeafRecog_SOURCE_FILES}
+               ${cvLeafnet_SOURCE_FILES}   ${cvLeafRecog_HEADER_FILES})
+add_executable(${cvDeepPlant_SAMPLE_NAME}  ${cvLeafRecog_LIBRARY_TYPE} ${cvLeafRecog_SOURCE_FILES}
+               ${cvDeepPlant_SOURCE_FILES} ${cvLeafRecog_HEADER_FILES})
+foreach(sample ${cvLeafRecog_SAMPLES})
+    if(MSVC)
+        set_target_properties(${sample} PROPERTIES LINKER_LANGUAGE C++)
+    endif()
+    target_include_directories(${sample} PUBLIC ${cvLeafRecog_INCLUDE_DIRS})
+    target_link_libraries(${sample} ${cvLeafRecog_LIBRARIES})
+endforeach()
 link_directories(${cvLeafRecog_LIBRARY_DIRS})
+
+# =========================
+# config & install
+# =========================
 
 # fix config paths as required
 string(REGEX REPLACE "\\\\" "/" INSTALL_INCLUDE_DIR ${INSTALL_INCLUDE_DIR})
@@ -139,7 +172,7 @@ string(REGEX REPLACE "\\\\" "/" INSTALL_LIBRARY_DIR ${INSTALL_LIBRARY_DIR})
 ##set(cvLeafRecog_FIND_CONFIG ${cvLeafRecog_FIND_CONFIG} "cmake/Findmvector.cmake")
 
 # install
-install(TARGETS ${cvLeafRecog_SAMPLE_NAME}
+install(TARGETS ${cvLeafRecog_SAMPLES}
         RUNTIME DESTINATION ${INSTALL_BINARY_DIR}
         LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
         ARCHIVE DESTINATION ${INSTALL_LIBRARY_DIR})
