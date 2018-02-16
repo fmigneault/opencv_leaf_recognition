@@ -17,13 +17,12 @@ model_name=FinetuneAlexNet_${model_type}_${model_leaf}
 models_dir=$base_dir/../deep_plant/deep_plant_Testing/Model
 model_proto=$models_dir/$model_name/deploy.prototxt
 model_caffe=$models_dir/$model_name/finetune_flickr_style_iter_100000.caffemodel
-model_labels=$models_dir/$model_name/id.txt
+model_labels=base_dir/../leaf_deep_learning/MalayaKew Dataset/MK/name_of_spesies.txt
 
 # ==========
 # command
 # ==========
-cmd='$deep_plant_path -image=$deep_plant_eval -model=$model_caffe -proto=$model_proto
-     -mean=$model_mean -labels=$model_labels'
+cmd='$deep_plant_path -image=$deep_plant_eval -model=$model_caffe -proto=$model_proto -labels=$model_labels'
 cmd_txt=$(eval "echo $cmd")
 
 # ==========

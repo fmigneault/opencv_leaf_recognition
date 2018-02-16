@@ -25,4 +25,6 @@ cd ..
 ```
 
 Then, launch the desired sample with the corresponding `sh` file.
-Some paths might require editing in these files to specify input image or model location on your machine.
+
+*__Note__*  
+Some paths might require editing in the `sh` files to specify input image or model location on your machine.
